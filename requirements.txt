@@ -1,3 +1,5 @@
-Pillow
-reportlab
+Pillow~=10.4.0
+reportlab~=4.2.2
 tk
+firebase~=4.0.1
+Pyrebase~=3.0.27

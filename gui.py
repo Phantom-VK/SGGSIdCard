@@ -1,43 +1,96 @@
 import tkinter as tk
-from tkinter import messagebox
+from tkinter import ttk, messagebox
+from PIL import Image, ImageTk
 from id_card import create_id_card
+from pdf_converter import convert_to_pdf
+from firebase_config import initialize_firebase, fetch_student_details
+from firebase_admin import db
 
-def generate_id_card():
-    details = {
-        "name": name_entry.get(),
-        "reg_no": reg_no_entry.get(),
-        "branch": branch_entry.get(),
-        "dob": dob_entry.get(),
-        "mob_no": mob_no_entry.get(),
-        "photo_path": photo_path_entry.get()
-    }
-    create_id_card(details)
-    messagebox.showinfo("Success", "ID Card created successfully!")
+# Initialize Firebase
+initialize_firebase()
 
-root = tk.Tk()
-root.title("ID Card Generator")
 
-tk.Label(root, text="Full Name").grid(row=0)
-tk.Label(root, text="Reg. No.").grid(row=1)
-tk.Label(root, text="Branch").grid(row=2)
-tk.Label(root, text="Date of Birth").grid(row=3)
-tk.Label(root, text="Mobile Number").grid(row=4)
-tk.Label(root, text="Photo Path").grid(row=5)
+class IDCardApp:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("ID Card Generator")
+        self.root.geometry("800x600")
 
-name_entry = tk.Entry(root)
-reg_no_entry = tk.Entry(root)
-branch_entry = tk.Entry(root)
-dob_entry = tk.Entry(root)
-mob_no_entry = tk.Entry(root)
-photo_path_entry = tk.Entry(root)
+        self.create_widgets()
 
-name_entry.grid(row=0, column=1)
-reg_no_entry.grid(row=1, column=1)
-branch_entry.grid(row=2, column=1)
-dob_entry.grid(row=3, column=1)
-mob_no_entry.grid(row=4, column=1)
-photo_path_entry.grid(row=5, column=1)
+    def create_widgets(self):
+        self.frame = ttk.Frame(self.root)
+        self.frame.pack(padx=10, pady=10, fill="x", expand=True)
 
-tk.Button(root, text='Generate ID Card', command=generate_id_card).grid(row=6, column=1, pady=4)
+        self.new_student_btn = ttk.Button(self.frame, text="Add New Student", command=self.add_new_student)
+        self.new_student_btn.pack(fill="x")
 
-root.mainloop()
+        self.generate_idcard_btn = ttk.Button(self.frame, text="Generate ID Card of Existing Student",
+                                              command=self.generate_id_card)
+        self.generate_idcard_btn.pack(fill="x", pady=5)
+
+        self.image_label = ttk.Label(self.root)
+        self.image_label.pack(pady=10)
+
+        self.convert_to_pdf_btn = ttk.Button(self.root, text="Convert to PDF", command=self.convert_to_pdf)
+        self.convert_to_pdf_btn.pack()
+
+    def add_new_student(self):
+        new_window = tk.Toplevel(self.root)
+        new_window.title("Add New Student")
+        new_window.geometry("400x400")
+
+        labels = ["Name", "Reg. No.", "Branch", "DOB", "Mob. No."]
+        self.entries = {}
+        for label in labels:
+            tk.Label(new_window, text=label).pack(pady=5)
+            entry = tk.Entry(new_window)
+            entry.pack(pady=5)
+            self.entries[label.lower()] = entry
+
+        submit_button = tk.Button(new_window, text="Submit", command=self.submit_new_student)
+        submit_button.pack(pady=20)
+
+    def submit_new_student(self):
+        details = {
+            "name": self.entries["name"].get(),
+            "reg_no": self.entries["reg. no."].get(),
+            "branch": self.entries["branch"].get(),
+            "dob": self.entries["dob"].get(),
+            "mob_no": self.entries["mob. no."].get()
+        }
+        ref = db.reference(f'/students/{details["reg_no"]}')
+        ref.set(details)
+        messagebox.showinfo("Success", "Student added successfully!")
+
+    def generate_id_card(self):
+        details = fetch_student_details()
+        # Assuming we want to generate ID card for the first student in the database
+        if details:
+            for reg_no, student_details in details.items():
+                image_path = create_id_card(student_details)
+                self.show_image(image_path)
+                self.current_image_path = image_path
+                break
+        else:
+            messagebox.showerror("Error", "No student details found in the database")
+
+    def show_image(self, image_path):
+        img = Image.open(image_path)
+        img = img.resize((400, 300))
+        img = ImageTk.PhotoImage(img)
+        self.image_label.configure(image=img)
+        self.image_label.image = img
+
+    def convert_to_pdf(self):
+        if hasattr(self, "current_image_path"):
+            convert_to_pdf(self.current_image_path)
+            messagebox.showinfo("Success", "ID Card successfully converted to PDF")
+        else:
+            messagebox.showerror("Error", "No image to convert")
+
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = IDCardApp(root)
+    root.mainloop()
