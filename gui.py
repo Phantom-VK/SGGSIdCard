@@ -9,7 +9,6 @@ from firebase_admin import db
 # Initialize Firebase
 initialize_firebase()
 
-
 class IDCardApp:
     def __init__(self, root):
         self.root = root
@@ -19,21 +18,39 @@ class IDCardApp:
         self.create_widgets()
 
     def create_widgets(self):
-        self.frame = ttk.Frame(self.root)
-        self.frame.pack(padx=10, pady=10, fill="x", expand=True)
+        self.paned_window = ttk.PanedWindow(self.root, orient=tk.HORIZONTAL)
+        self.paned_window.pack(fill=tk.BOTH, expand=True)
 
-        self.new_student_btn = ttk.Button(self.frame, text="Add New Student", command=self.add_new_student)
-        self.new_student_btn.pack(fill="x")
+        self.left_pane = ttk.Frame(self.paned_window, width=200)
+        self.paned_window.add(self.left_pane, weight=1)
 
-        self.generate_idcard_btn = ttk.Button(self.frame, text="Generate ID Card of Existing Student",
-                                              command=self.generate_id_card)
-        self.generate_idcard_btn.pack(fill="x", pady=5)
+        self.right_pane = ttk.Frame(self.paned_window)
+        self.paned_window.add(self.right_pane, weight=3)
 
-        self.image_label = ttk.Label(self.root)
+        self.new_student_btn = ttk.Button(self.left_pane, text="Add New Student", command=self.add_new_student)
+        self.new_student_btn.pack(fill="x", pady=10, padx=10)
+
+        self.generate_idcard_btn = ttk.Button(self.left_pane, text="Generate ID Card of Existing Student",
+                                              command=self.generate_for_existing_student)
+        self.generate_idcard_btn.pack(fill="x", pady=10, padx=10)
+
+        self.image_label = ttk.Label(self.right_pane)
         self.image_label.pack(pady=10)
 
-        self.convert_to_pdf_btn = ttk.Button(self.root, text="Convert to PDF", command=self.convert_to_pdf)
+        self.convert_to_pdf_btn = ttk.Button(self.right_pane, text="Convert to PDF", command=self.convert_to_pdf)
         self.convert_to_pdf_btn.pack()
+
+    def generate_for_existing_student(self):
+        new_window = tk.Toplevel(self.root)
+        new_window.title("Enter student registration no")
+        new_window.geometry("400x200")
+
+        tk.Label(new_window, text="Enter Reg.No.").pack(pady=5)
+        self.entry = tk.Entry(new_window)
+        self.entry.pack(pady=5)
+
+        generate_btn = tk.Button(new_window, text="Generate", command=lambda: self.generate_id_card(self.entry.get().upper()))
+        generate_btn.pack(pady=20)
 
     def add_new_student(self):
         new_window = tk.Toplevel(self.root)
@@ -63,21 +80,18 @@ class IDCardApp:
         ref.set(details)
         messagebox.showinfo("Success", "Student added successfully!")
 
-    def generate_id_card(self):
-        details = fetch_student_details()
-        # Assuming we want to generate ID card for the first student in the database
+    def generate_id_card(self, reg_no):
+        details = fetch_student_details(reg_no)
         if details:
-            for reg_no, student_details in details.items():
-                image_path = create_id_card(student_details)
-                self.show_image(image_path)
-                self.current_image_path = image_path
-                break
+            image_path = create_id_card(details)
+            self.show_image(image_path)
+            self.current_image_path = image_path
         else:
             messagebox.showerror("Error", "No student details found in the database")
 
     def show_image(self, image_path):
         img = Image.open(image_path)
-        img = img.resize((400, 300))
+        img = img.resize((300, 500))
         img = ImageTk.PhotoImage(img)
         self.image_label.configure(image=img)
         self.image_label.image = img

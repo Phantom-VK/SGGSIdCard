@@ -9,6 +9,6 @@ def initialize_firebase():
     })
 
 
-def fetch_student_details():
-    ref = db.reference("/students")
+def fetch_student_details(reg_no):
+    ref = db.reference(f"/students/{reg_no}")
     return ref.get()

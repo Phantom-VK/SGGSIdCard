@@ -11,10 +11,10 @@ def create_id_card(details):
     font2 = ImageFont.truetype("arial.ttf", 30)
     # getting details
     name = details["name"]
-    reg_no: str = details["reg_no"]
-    branch: str = details["branch"]
-    dob: str = details["dob"]
-    mob_no: str = details["mob_no"]
+    reg_no = details["reg_no"]
+    branch = details["branch"]
+    dob = details["dob"]
+    mob_no = details["mob_no"]
 
     name_width = font.getlength(name)
 
@@ -35,14 +35,14 @@ def create_id_card(details):
 
     return output_path
 
-test_student_details = {
-    "name": "Vikramaditya Khupse",
-    "reg_no": "2023XYZ123",
-    "branch": "Computer Science",
-    "dob": "15/08/2000",
-    "mob_no": "9876543210"
-}
-
-# Usage example
-image_path = create_id_card(test_student_details)
-print(f"ID Card created at: {image_path}")
+# test_student_details = {
+#     "name": "Vikramaditya Khupse",
+#     "reg_no": "2023XYZ123",
+#     "branch": "Computer Science",
+#     "dob": "15/08/2000",
+#     "mob_no": "9876543210"
+# }
+#
+# # Usage example
+# image_path = create_id_card(test_student_details)
+# print(f"ID Card created at: {image_path}")
