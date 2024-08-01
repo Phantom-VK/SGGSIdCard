@@ -1,4 +1,5 @@
 import os
+import sys
 import tkinter as tk
 from tkinter import ttk, messagebox
 from PIL import Image, ImageTk
@@ -9,6 +10,7 @@ from firebase_admin import db
 
 # Initialize Firebase
 initialize_firebase()
+
 
 class IDCardApp:
     def __init__(self, root):
@@ -50,7 +52,8 @@ class IDCardApp:
         self.entry = tk.Entry(new_window)
         self.entry.pack(pady=5)
 
-        generate_btn = tk.Button(new_window, text="Generate", command=lambda: self.generate_id_card(self.entry.get().upper()))
+        generate_btn = tk.Button(new_window, text="Generate",
+                                 command=lambda: self.generate_id_card(self.entry.get().upper()))
         generate_btn.pack(pady=20)
 
     def add_new_student(self):
@@ -100,12 +103,8 @@ class IDCardApp:
 
     def convert_to_pdf(self):
         if hasattr(self, "current_image_path"):
-            convert_to_pdf(self.current_image_path,  self.current_student_name)
+            convert_to_pdf(self.current_image_path, self.current_student_name)
             messagebox.showinfo("Success", "ID Card successfully converted to PDF and saved to Downloads folder")
         else:
             messagebox.showerror("Error", "No image to convert")
 
-if __name__ == "__main__":
-    root = tk.Tk()
-    app = IDCardApp(root)
-    root.mainloop()
