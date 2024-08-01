@@ -1,3 +1,4 @@
+import os
 import tkinter as tk
 from tkinter import ttk, messagebox
 from PIL import Image, ImageTk
@@ -76,7 +77,7 @@ class IDCardApp:
             "dob": self.entries["dob"].get(),
             "mob_no": self.entries["mob. no."].get()
         }
-        ref = db.reference(f'/students/{details["reg_no"]}')
+        ref = db.reference(f'/students/{details["reg_no"].upper()}')
         ref.set(details)
         messagebox.showinfo("Success", "Student added successfully!")
 
@@ -86,6 +87,7 @@ class IDCardApp:
             image_path = create_id_card(details)
             self.show_image(image_path)
             self.current_image_path = image_path
+            self.current_student_name = details["name"]
         else:
             messagebox.showerror("Error", "No student details found in the database")
 
@@ -98,11 +100,10 @@ class IDCardApp:
 
     def convert_to_pdf(self):
         if hasattr(self, "current_image_path"):
-            convert_to_pdf(self.current_image_path)
-            messagebox.showinfo("Success", "ID Card successfully converted to PDF")
+            convert_to_pdf(self.current_image_path,  self.current_student_name)
+            messagebox.showinfo("Success", "ID Card successfully converted to PDF and saved to Downloads folder")
         else:
             messagebox.showerror("Error", "No image to convert")
-
 
 if __name__ == "__main__":
     root = tk.Tk()
