@@ -1,9 +1,10 @@
 import os
+import sys
 import tkinter as tk
 from tkinter import messagebox
 from PIL import Image, ImageTk
 from customtkinter import CTk, CTkFrame, CTkLabel, CTkButton, CTkEntry
-
+import logging
 import check_inputs
 from id_card import create_id_card
 from pdf_converter import convert_to_pdf
@@ -14,11 +15,20 @@ from firebase_admin import db
 initialize_firebase()
 
 
+def resource_path(relative_path):
+    """ Get absolute path to resource, works for development and for PyInstaller """
+    try:
+        base_path = sys._MEIPASS
+    except AttributeError:
+        base_path = os.path.dirname(__file__)
+    return os.path.join(base_path, relative_path)
+
+
 def show_image(image_path, label):
     """
     Display an image on the specified label.
     """
-    img = Image.open(image_path)
+    img = Image.open(resource_path(image_path))
     img = img.resize((300, 500))
     img = ImageTk.PhotoImage(img)
     label.configure(image=img)

@@ -1,7 +1,19 @@
+import os
+import sys
+
 import barcode
 from PIL import Image, ImageDraw, ImageFont
 from barcode.writer import ImageWriter
 import segno
+
+
+def resource_path(relative_path):
+    """ Get absolute path to resource, works for development and for PyInstaller """
+    try:
+        base_path = sys._MEIPASS
+    except AttributeError:
+        base_path = os.path.dirname(__file__)
+    return os.path.join(base_path, relative_path)
 
 
 def create_id_card(student_details):
@@ -15,14 +27,15 @@ def create_id_card(student_details):
         tuple: Paths to the saved front and back images of the ID card.
     """
     # Load the front and back template images
-    id_card_front = Image.open("idcard_front.png")
+    id_card_front = Image.open(resource_path("Idcard_front.png"))
     front_draw = ImageDraw.Draw(id_card_front)
-    id_card_back = Image.open("idcard_back.png")
+    id_card_back = Image.open(resource_path("Idcard_back.png"))
     back_draw = ImageDraw.Draw(id_card_back)
 
     # Load the font
-    font = ImageFont.truetype("arial.ttf", 40)
-    font2 = ImageFont.truetype("arial.ttf", 30)
+    font_path = resource_path("arial.ttf")
+    font = ImageFont.truetype(font_path, 40)
+    font2 = ImageFont.truetype(font_path, 30)
 
     # Extract student details
     name = student_details["name"]
@@ -63,9 +76,13 @@ def create_id_card(student_details):
     back_draw.text((60, 80), formatted_address, font=font2, fill="black")
 
     # Save the ID card images
-    output_path_front = f"output/{reg_no}_id_card_front.png"
+    output_dir = resource_path("output")
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+
+    output_path_front = os.path.join(output_dir, f"{reg_no}_id_card_front.png")
     id_card_front.save(output_path_front)
-    output_path_back = f"output/{reg_no}_id_card_back.png"
+    output_path_back = os.path.join(output_dir, f"{reg_no}_id_card_back.png")
     id_card_back.save(output_path_back)
 
     return output_path_front, output_path_back
@@ -92,10 +109,12 @@ def generate_barcode(data):
         'write_text': False
     }
 
+    barcode_path = resource_path("barcode.png")
     code128 = barcode.get_barcode_class('code128')
     barcode_instance = code128(data, writer=ImageWriter())
 
-    return barcode_instance.save("barcode", options=options)
+    barcode_instance.save(barcode_path, options=options)
+    return barcode_path
 
 
 def generate_qr_code(data):
@@ -108,11 +127,12 @@ def generate_qr_code(data):
     Returns:
         str: Path to the saved QR code image.
     """
+    qrcode_path = resource_path("qrcode.png")
     qrcode = segno.make_qr(data)
-    qrcode.save("qrcode.png")
-    return "qrcode.png"
+    qrcode.save(qrcode_path)
+    return qrcode_path
 
-
+# Example usage:
 # details = {
 #     "name": "Vikramaditya Khupse",
 #     "reg_no": "2022BIT052",
