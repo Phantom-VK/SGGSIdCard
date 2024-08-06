@@ -33,7 +33,7 @@ class IDCardApp:
         self.left_pane = None
         self.root = root
         self.root.title("SGGSIdCard Generator")
-        self.root.geometry("1200x600")
+        self.root.geometry("1920x1080")
 
         self.entries = {}
         self.image_labels = {
@@ -53,13 +53,13 @@ class IDCardApp:
         self.paned_window = tk.PanedWindow(self.root, orient=tk.HORIZONTAL)
         self.paned_window.pack(fill=tk.BOTH, expand=True)
 
-        self._create_input_pane()
-
         # Middle and Right Panes - ID Card Preview
         self.middle_pane = self._create_preview_pane("Front")
         self.right_pane = self._create_preview_pane("Back")
         self.paned_window.add(self.middle_pane, stretch="always")
         self.paned_window.add(self.right_pane, stretch="always")
+
+        self._create_input_pane()
 
     def _create_input_pane(self):
         """
@@ -131,7 +131,7 @@ class IDCardApp:
             front_image_path, back_image_path = create_id_card(details)
             show_image(front_image_path, self.image_labels["front"])
             show_image(back_image_path, self.image_labels["back"])
-            self.current_image_path = front_image_path  # assuming only front side needs to be converted to PDF
+            self.current_image_path = front_image_path  # Storefront image path for conversion
             self.current_student_name = details["name"]
         else:
             messagebox.showerror("Error", "No student details found in the database")
@@ -145,12 +145,14 @@ class IDCardApp:
             widget.destroy()
 
         # Add form widgets
-        labels = ["Name", "Reg. No.", "Branch", "DOB", "Mob. No."]
-        for label in labels:
+        labels = ["Name", "Reg. No.", "Branch", "DOB", "Mob. No.", "Parent Mob. No.", "Address"]
+        keys = ["name", "reg_no", "branch", "dob", "mob_no", "parent_mob_no", "address"]
+
+        for label, key in zip(labels, keys):
             CTkLabel(self.left_pane, text=label).pack(pady=5)
             entry = CTkEntry(self.left_pane)
             entry.pack(pady=5)
-            self.entries[label.lower().replace(" ", "_")] = entry
+            self.entries[key] = entry
 
         submit_button = CTkButton(self.left_pane, text="Submit", command=self.submit_new_student)
         submit_button.pack(pady=20)
@@ -178,7 +180,9 @@ class IDCardApp:
             "reg_no": self.entries["reg_no"].get(),
             "branch": self.entries["branch"].get(),
             "dob": self.entries["dob"].get(),
-            "mob_no": self.entries["mob_no"].get()
+            "mob_no": self.entries["mob_no"].get(),
+            "parent_mob_no": self.entries["parent_mob_no"].get(),
+            "address": self.entries["address"].get()
         }
         ref = db.reference(f'/students/{details["reg_no"].upper()}')
         ref.set(details)
@@ -187,10 +191,12 @@ class IDCardApp:
 
     def convert_to_pdf(self):
         """
-        Convert the current ID card image to a PDF.
+        Convert the current ID card images to a PDF.
         """
         if self.current_image_path:
-            convert_to_pdf(self.current_image_path, self.current_student_name)
+            back_image_path = self.current_image_path.replace("front", "back")
+
+            convert_to_pdf(self.current_image_path, back_image_path, self.current_student_name)
             messagebox.showinfo("Success", "ID Card successfully converted to PDF and saved to Downloads folder")
         else:
             messagebox.showerror("Error", "No image to convert")

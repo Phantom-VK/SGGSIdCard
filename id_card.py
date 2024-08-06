@@ -113,15 +113,14 @@ def generate_qr_code(data):
     return "qrcode.png"
 
 
-# Example usage
-details = {
-    "name": "Vikramaditya Khupse",
-    "reg_no": "2022BIT052",
-    "branch": "Information Technology",
-    "dob": "25/05/2004",
-    "mob_no": "853029251",
-    "parent_mob_no": "9960515228",
-    "address": "Shivram Nagar, Basmat Road, Parbhani, Parbhani, Parbhani 431 401"
-}
-
-create_id_card(details)
+# details = {
+#     "name": "Vikramaditya Khupse",
+#     "reg_no": "2022BIT052",
+#     "branch": "Information Technology",
+#     "dob": "25/05/2004",
+#     "mob_no": "853029251",
+#     "parent_mob_no": "9960515228",
+#     "address": "Shivram Nagar, Basmat Road, Parbhani, Parbhani, Parbhani 431 401"
+# }
+#
+# create_id_card(details)
