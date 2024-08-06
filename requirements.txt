@@ -3,3 +3,4 @@ reportlab~=4.2.2
 tk
 firebase~=4.0.1
 Pyrebase~=3.0.27
+customtkinter~=5.2.2

@@ -3,7 +3,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 def create_id_card(details):
     # Load the template
-    template = Image.open("SGGSIdCard.png")
+    template = Image.open("idcard_front.png")
     draw = ImageDraw.Draw(template)
 
     # Load a font
@@ -30,19 +30,8 @@ def create_id_card(details):
     draw.text((x_position_other_details, 995), f"{dob}", font=font2, fill="black")
     draw.text((x_position_other_details, 1058), f"{mob_no}", font=font2, fill="black")
     # Save the result
-    output_path = f"output/{name}id_card.png"
+    output_path = f"output/{reg_no}id_card.png"
     template.save(output_path)
 
-    return output_path
+    return output_path, output_path
 
-# test_student_details = {
-#     "name": "Vikramaditya Khupse",
-#     "reg_no": "2023XYZ123",
-#     "branch": "Computer Science",
-#     "dob": "15/08/2000",
-#     "mob_no": "9876543210"
-# }
-#
-# # Usage example
-# image_path = create_id_card(test_student_details)
-# print(f"ID Card created at: {image_path}")
